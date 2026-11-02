@@ -1,0 +1,20 @@
+﻿@model Device
+@{ ViewData["Title"] = Model.AssetTag; }
+
+<h1>@Model.Name</h1>
+
+<dl class="row">
+    <dt class="col-sm-3">@Html.DisplayNameFor(m => m.AssetTag)</dt>
+    <dd class="col-sm-9">@Model.AssetTag</dd>
+
+    <dt class="col-sm-3">@Html.DisplayNameFor(m => m.Category)</dt>
+    <dd class="col-sm-9">@Model.Category</dd>
+
+    <dt class="col-sm-3">@Html.DisplayNameFor(m => m.PurchaseYear)</dt>
+    <dd class="col-sm-9">@Model.PurchaseYear</dd>
+
+    <dt class="col-sm-3">@Html.DisplayNameFor(m => m.IsOnLoan)</dt>
+    <dd class="col-sm-9">@(string.Equals(Model.IsOnLoan, "yes", StringComparison.OrdinalIgnoreCase) ? "Yes" : "No")</dd>
+</dl>
+
+<a asp-action="Index">Back to the list</a>

@@ -1,0 +1,9 @@
+﻿@model Device
+@{ ViewData["Title"] = "Delete device"; }
+
+<h1>Delete @Model.AssetTag @Model.Name?</h1>
+
+<form asp-action="DeleteConfirmed" asp-route-id="@Model.Id" method="post">
+    <button class="btn btn-danger">Yes</button>
+    <a asp-action="Index" class="btn btn-secondary">No</a>
+</form>
