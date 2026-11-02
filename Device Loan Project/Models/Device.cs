@@ -23,9 +23,9 @@ namespace Device_Loan_Project.Models
         public string Category { get; set; } = "";
 
 
-        [Required(ErrorMessage = "must be between 2015 to 2026 , no way you a smartphone before 1999")]
-        [Display(Name = "PurchaseYear")]
-        public string PurchaseYear { get; set; } = "";
+        [Range(2015, 2026, ErrorMessage = "must be between 2015 to 2026 , no way you a smartphone before 1999")]
+        [Display(Name = "Year Bought")]
+        public int PurchaseYear { get; set; } = 0;
 
 
         [Display(Name = "IsOnLoan")]

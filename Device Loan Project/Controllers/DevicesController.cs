@@ -1,26 +1,22 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Device_Loan_Project.Data;
+﻿using Device_Loan_Project.Data;
 using Device_Loan_Project.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Device_Loan_Project.Controllers
 {
     public class DevicesController : Controller
     {
         private readonly AppDbContext _db;
-        public DevicesController(AppDbContext db) => _db = db;
 
-
-        [HttpGet("devices/{id:int}")]
-        public async Task<IActionResult> Details(int id)
+        public DevicesController(AppDbContext db)
         {
-            var device = await _db.Devices.FindAsync(id);
-            if (device == null) return NotFound();
-            return View(device);
+            _db = db;
         }
 
+        // Task 3 + Task 5: list, search and filter
         [HttpGet("devices")]
-        public async Task<IActionResult> Index(string? q, bool availableOnly)
+        public IActionResult Index(string? q, bool availableOnly)
         {
             var query = _db.Devices.AsQueryable();
 
@@ -29,7 +25,7 @@ namespace Device_Loan_Project.Controllers
             if (availableOnly)
                 query = query.Where(d => d.IsOnLoan == "no");
 
-            var devices = await query.OrderBy(d => d.AssetTag).ToListAsync();
+            var devices = query.OrderBy(d => d.AssetTag).ToList();
 
             ViewBag.Count = devices.Count;
             ViewBag.Q = q;
@@ -37,51 +33,64 @@ namespace Device_Loan_Project.Controllers
             return View(devices);
         }
 
+        // Task 4: details
+        [HttpGet("devices/{id:int}")]
+        public IActionResult Details(int id)
+        {
+            Device? device = _db.Devices.Find(id);
+            if (device == null) return NotFound();
+            return View(device);
+        }
 
+        // Task 6: add
         [HttpGet("devices/add")]
-        public IActionResult Add() => View(new Device());
+        public IActionResult Add()
+        {
+            return View(new Device { PurchaseYear = DateTime.Now.Year });
+        }
 
         [HttpPost("devices/add")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Add(
+        public IActionResult Add(
             [Bind("AssetTag,Name,Category,PurchaseYear,IsOnLoan")] Device device)
         {
             if (!string.IsNullOrWhiteSpace(device.AssetTag) &&
-                await _db.Devices.AnyAsync(d => d.AssetTag == device.AssetTag))
+                _db.Devices.Any(d => d.AssetTag == device.AssetTag))
             {
-                ModelState.AddModelError(nameof(Device.AssetTag), "Device is already here,idiot");
+                ModelState.AddModelError(nameof(Device.AssetTag), "Another device already has that asset tag.");
             }
 
-            if (!ModelState.IsValid) return View(device);   
+            if (!ModelState.IsValid) return View(device);
 
             device.IsOnLoan = device.IsOnLoan.Trim().ToLower();
             _db.Devices.Add(device);
-            await _db.SaveChangesAsync();
+            _db.SaveChanges();
 
-            TempData["Message"] = $"{device.Name} was added.";
-            return RedirectToAction(nameof(Index));
+            TempData["Message"] = $"{device.AssetTag} {device.Name} was added.";
+            return RedirectToAction("Index");
         }
 
+        // Task 7: edit
         [HttpGet("devices/edit/{id:int}")]
-        public async Task<IActionResult> Edit(int id)
+        public IActionResult Edit(int id)
         {
-            var device = await _db.Devices.FindAsync(id);
+            Device? device = _db.Devices.Find(id);
             if (device == null) return NotFound();
             return View(device);
         }
 
         [HttpPost("devices/edit/{id:int}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id,
+        public IActionResult Edit(int id,
             [Bind("AssetTag,Name,Category,PurchaseYear,IsOnLoan")] Device input)
         {
-            var device = await _db.Devices.FindAsync(id);
+            Device? device = _db.Devices.Find(id);
             if (device == null) return NotFound();
 
             if (!string.IsNullOrWhiteSpace(input.AssetTag) &&
-                await _db.Devices.AnyAsync(d => d.AssetTag == input.AssetTag && d.Id != id))
+                _db.Devices.Any(d => d.AssetTag == input.AssetTag && d.Id != id))
             {
-                ModelState.AddModelError(nameof(Device.AssetTag), "Some other device has that tag.");
+                ModelState.AddModelError(nameof(Device.AssetTag), "Another device already has that asset tag.");
             }
 
             if (!ModelState.IsValid)
@@ -95,43 +104,43 @@ namespace Device_Loan_Project.Controllers
             device.Category = input.Category;
             device.PurchaseYear = input.PurchaseYear;
             device.IsOnLoan = input.IsOnLoan.Trim().ToLower();
-            await _db.SaveChangesAsync();
+            _db.SaveChanges();
 
             TempData["Message"] = $"{device.AssetTag} was updated.";
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index");
         }
 
+        // Task 8: delete
         [HttpGet("devices/delete/{id:int}")]
-        public async Task<IActionResult> Delete(int id)
+        public IActionResult Delete(int id)
         {
-            var device = await _db.Devices.FindAsync(id);
+            Device? device = _db.Devices.Find(id);
             if (device == null) return NotFound();
-            return View(device);          // opening the page deletes nothing
+            return View(device);
         }
 
         [HttpPost("devices/delete/{id:int}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(int id)
         {
-            var device = await _db.Devices.FindAsync(id);
+            Device? device = _db.Devices.Find(id);
             if (device == null)
             {
-                TempData["Message"] = "That Device aint here no more.";
-                return RedirectToAction(nameof(Index));
+                TempData["Message"] = "That device was already deleted.";
+                return RedirectToAction("Index");
             }
 
             _db.Devices.Remove(device);
             try
             {
-                await _db.SaveChangesAsync();
+                _db.SaveChanges();
                 TempData["Message"] = $"{device.AssetTag} was deleted.";
             }
-            catch (DbUpdateConcurrencyException)  
+            catch (DbUpdateConcurrencyException)
             {
-                TempData["Message"] = "That Device aint here no more.";
+                TempData["Message"] = "That device was already deleted.";
             }
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index");
         }
-
     }
 }

@@ -48,9 +48,8 @@ namespace Device_Loan_Project.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("PurchaseYear")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("PurchaseYear")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -67,7 +66,7 @@ namespace Device_Loan_Project.Migrations
                             Category = "Laptop",
                             IsOnLoan = "yes",
                             Name = "Dell Latitude",
-                            PurchaseYear = "2023"
+                            PurchaseYear = 2023
                         },
                         new
                         {
@@ -76,7 +75,7 @@ namespace Device_Loan_Project.Migrations
                             Category = "Laptop",
                             IsOnLoan = "no",
                             Name = "HP ProBook 450",
-                            PurchaseYear = "2019"
+                            PurchaseYear = 2019
                         },
                         new
                         {
@@ -85,7 +84,7 @@ namespace Device_Loan_Project.Migrations
                             Category = "Tablet",
                             IsOnLoan = "yes",
                             Name = "iPad 9th generation",
-                            PurchaseYear = "2022"
+                            PurchaseYear = 2022
                         },
                         new
                         {
@@ -94,7 +93,7 @@ namespace Device_Loan_Project.Migrations
                             Category = "Tablet",
                             IsOnLoan = "no",
                             Name = "Samsung Galexy Tab A8",
-                            PurchaseYear = "2021"
+                            PurchaseYear = 2021
                         },
                         new
                         {
@@ -103,7 +102,7 @@ namespace Device_Loan_Project.Migrations
                             Category = "Laptop",
                             IsOnLoan = "no",
                             Name = "Lenovo ThinkPad E 14",
-                            PurchaseYear = "2017"
+                            PurchaseYear = 2017
                         });
                 });
 #pragma warning restore 612, 618
